@@ -41,20 +41,20 @@
                   <span class="selected"></span>
                 </a>
               </li>
-                <li class="nav-item start">
+                <!-- <li class="nav-item start">
                 <a href="manage_agent" class="nav-link nav-toggle">
                 <i class="fa fa-address-book" aria-hidden="true"></i>
                   <span class="title">Manage Agent</span>
                   <span class="selected"></span>
                 </a>
-              </li>
-              <li class="nav-item start">
+              </li> -->
+              <!-- <li class="nav-item start">
                 <a href="customer" class="nav-link nav-toggle">
                 <i class="fa fa-address-book" aria-hidden="true"></i>
                   <span class="title">Manage Customer</span>
                   <span class="selected"></span>
                 </a>
-              </li>
+              </li> -->
               <!-- <li class="nav-item start">
                 <a href="analytics" class="nav-link nav-toggle">
                 <i class="fa fa-bar-chart" aria-hidden="true"></i>

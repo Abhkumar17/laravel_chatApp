@@ -51,7 +51,7 @@ class AuthController extends Controller
         }
 
         //create token
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('userlogin')->plainTextToken;
 
         $response = [
             'status'=>true,
@@ -65,20 +65,20 @@ class AuthController extends Controller
     }
 
 
-    // public function logout(Request $request){
-    //     auth()->user()->tokens()->delete();
-    //     $response = [
-    //         'status'=>true,
-    //         'message'=>'Logout successfully',
-    //     ];
-    //     return response($response,201);
-    // }
+    public function logout(Request $request){
+        auth()->user()->currentAccessToken()->delete();
+        $response = [
+            'status'=>true,
+            'message'=>'Logout successfully',
+        ];
+        return response($response,201);
+    }
 
 
     public function userIfno(Request $request){
        // return "hello";
-       $user = User::all();
-       return response()->json([
+       $user = User::first();
+        return response()->json([
         'status' => true,
         'user'=>$user,
         'message' => 'User found',

@@ -15,7 +15,7 @@ class AuthController extends Controller
         $fields = $request->validate([
             'name' =>'required|string',
             'email'=>'required|string|email|unique:users,email',
-            'password' =>'required|confirmed'
+            'password' =>'required'
         ]);
 
         $user = User::create([
@@ -87,16 +87,30 @@ class AuthController extends Controller
 }
 
 public function useragent(Request $request)
-{
-   
-    $users = User::where('type', '=','admin')->get();
-    //$users = DB::table('users')->where('type', '=', 'agent')->get();
-    return response()->json([
-    'status' => 200,
-    'user'=>$users,
-    'message' => 'Agent found',
-], 200);
+    {
     
-}
+        $users = User::where('type', '=','admin')->get();
+        //$users = DB::table('users')->where('type', '=', 'agent')->get();
+        return response()->json([
+        'status' => 200,
+        'user'=>$users,
+        'message' => 'Agent found',
+    ], 200);
+        
+    }
+
+    public function getMassage(Request $request)
+    {
+        $id = Auth::user()->id;
+        print_r($id); exit;
+        $users = User::where('type', '=','agent')->get();
+        //$users = DB::table('users')->where('type', '=', 'agent')->get();
+        return response()->json([
+        'status' => 200,
+        'user'=>$users,
+        'message' => 'Agent found',
+    ], 200);
+        
+    }
     
 }

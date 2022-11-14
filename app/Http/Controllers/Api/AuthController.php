@@ -85,5 +85,18 @@ class AuthController extends Controller
         'data' => auth('api')->user()
     ], 200);
 }
+
+public function useragent(Request $request)
+{
+   
+    $users = User::where('type', '=','admin')->get();
+    //$users = DB::table('users')->where('type', '=', 'agent')->get();
+    return response()->json([
+    'status' => 200,
+    'user'=>$users,
+    'message' => 'Agent found',
+], 200);
+    
+}
     
 }

@@ -1,116 +1,139 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use \App\Models\User;
+use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+
 class AuthController extends Controller
 {
    
     public function register(Request $request){
-       
-        $fields = $request->validate([
-            'name' =>'required|string',
-            'email'=>'required|string|email|unique:users,email',
-            'password' =>'required'
-        ]);
-
-        $user = User::create([
-            'name'=>$fields['name'],
-            'email'=>$fields['email'],
-            'password'=>Hash::make($fields['password']),
-        ]);
-
-        //create token
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        
+        $data = $request->all();
+        $validator = Validator::make($request->all(), [ 
+                'name' => 'required',
+                'email' => 'required|email|unique:users',
+                'password' => 'required'
+                
+            ]);
+            if ($validator->fails()) { 
+                 return response()->json(['error'=>$validator->errors()], 401);            
+            }
+        $checkemail = User::select('*')->where('email','=',$data['email'])->get();
+        
+               
+        if(count($checkemail)==0){
+            
+              
+                    $data['password'] = Hash::make($data['password']);
+                    $user_id = mt_rand(100000, 999999);
+                   
+                                $user = new User();
+                                $user->user_id = $user_id;
+                                $user->name = $data['name'];
+                                $user->email = $data['email'];
+                                $user->password = $data['password'];
+                                $user->save();
+                     
+                    $token =  $user->createToken('registerapi')->plainTextToken; 
+                    $name =  $user->name;
+             return response()->json(['token'=>$token, 'name'=>$name], 200);
+        }else{
+        $message='Already email Exit!';
 
         $response = [
-            'status'=>true,
-            'message'=>'registered successfully!',
-            'data' =>[
-                'user'=>$user,
-                'token'=>$token
-            ]
+            'status'=>false,
+            'message'=>'Already email Exit!',
         ];
-        return response($response,201);
+        return response()->json(['status'=>false, 'message'=>$message], 200);
     }
+ }
+    
 
     public function login(Request $request){
-        $fields = $request->validate([
-            'email'=>'required|string|email',
-            'password' =>'required'
-        ]);
-        //check email
-        $user = User::where('email',$fields['email'])->first();
-        //check password
-        if(!$user || !Hash::check($fields['password'],$user->password)){
-            return response(['status'=>false,'message'=>'invalid email or password'],401);
-        }
+        
 
-        //create token
-        $token = $user->createToken('userlogin')->plainTextToken;
+      $validator = Validator::make($request->all(), [ 
+                'email' => 'required',
+                'password' => 'required',
+                
+            ]);
+       if ($validator->fails()) { 
+                 return response()->json(['error'=>$validator->errors()], 401);            
+        }else{
+      if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
+            $user = Auth::user(); 
+            $token =  $user->createToken('loginapi')->plainTextToken; 
+            $id = $user->id;
+            $name = $user->name;
+            $email = $user->email;
+            return response()->json(['token' => $token, 'id' => $id, 'name' => $name,'email' => $email], 200); 
+        } 
+        else{ 
+            return response()->json(['error'=>'Not register user!'], 401); 
+        } 
+       }
 
-        $response = [
-            'status'=>true,
-            'message'=>'Login successful!',
-            'data' =>[
-                'user'=>$user,
-                'token'=>$token
-            ]
-        ];
-        return response($response,201);
     }
 
 
-    public function logout(Request $request){
-        auth()->user()->currentAccessToken()->delete();
-        $response = [
-            'status'=>true,
-            'message'=>'Logout successfully',
-        ];
-        return response($response,201);
+    public function logout(Request $request) {
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'User logout successfully'], 200);
     }
 
-
-    public function userIfno(Request $request){
-       // return "hello";
-       $user = User::first();
-        return response()->json([
-        'status' => true,
-        'user'=>$user,
-        'message' => 'User found',
-        'data' => auth('api')->user()
-    ], 200);
-}
-
-public function useragent(Request $request)
+    public function userIfno(Request $request)
     {
-    
-        $users = User::where('type', '=','admin')->get();
-        //$users = DB::table('users')->where('type', '=', 'agent')->get();
+        //dd('helo');
+       
+        $users = User::all();
+       // $users = DB::table('users')->where('type', '=', 'agent')->get();
         return response()->json([
         'status' => 200,
         'user'=>$users,
-        'message' => 'Agent found',
+        'message' => 'User found',
+        'data' => auth('api')->user()
     ], 200);
-        
-    }
 
-    public function getMassage(Request $request)
+   }
+
+
+   public function useragent(Request $request)
     {
-        $id = Auth::user()->id;
-        print_r($id); exit;
+        //$user_id = Auth::user()->id;
         $users = User::where('type', '=','agent')->get();
         //$users = DB::table('users')->where('type', '=', 'agent')->get();
         return response()->json([
         'status' => 200,
         'user'=>$users,
         'message' => 'Agent found',
+         'data' => auth('api')->user()
+    ], 200);
+        
+   }
+
+   public function getMassage(Request $request)
+    {
+        $id = Auth::user()->id;
+        
+        $users = User::where('id',$id)->where('type', '=','agent')->first();
+        $chat_messages = DB::table('chat_messages')->where('id',$id)->get();
+
+        return response()->json([
+        'status' => 200,
+        'chat_messages'=>$chat_messages,
+        // 'data' => auth('api')->user(),
+        // 'message' => 'Agent found',
     ], 200);
         
     }
-    
 }
+

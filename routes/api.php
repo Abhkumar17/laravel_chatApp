@@ -10,11 +10,11 @@ use App\Http\Controllers\Api\AuthController;
 Route::post("/register",[AuthController::class,'register']);
 Route::post("/login",[AuthController::class,'login']);
 Route::get("useragent",[AuthController::class,'useragent']);
-Route::get("getMassage",[AuthController::class,'getMassage']);
+//Route::get("getMassage",[AuthController::class,'getMassage']);
 
 Route::group(['middleware' => ['auth:sanctum']], function(){
     //All secure URL's
-    
+    Route::get("getMassage",[AuthController::class,'getMassage']);
     Route::get('userIfno',[AuthController::class,'userIfno']);
     Route::post('logout',[AuthController::class,'logout']);
     });
